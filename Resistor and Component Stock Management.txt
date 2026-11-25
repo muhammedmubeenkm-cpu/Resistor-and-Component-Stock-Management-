@@ -1,0 +1,145 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+#define MAX_RECORDS 50
+
+struct Component {
+    char type[30];
+    char value[30];
+    int quantity;
+};
+
+// Helper function to convert color name to its digit/multiplier value
+int getColorValue(char *color) {
+    char lower[20];
+    int i = 0;
+    while(color[i] && i < 19) {
+        lower[i] = tolower(color[i]);
+        i++;
+    }
+    lower[i] = '\0';
+
+    if (strcmp(lower, "black") == 0) return 0;
+    if (strcmp(lower, "brown") == 0) return 1;
+    if (strcmp(lower, "red") == 0) return 2;
+    if (strcmp(lower, "orange") == 0) return 3;
+    if (strcmp(lower, "yellow") == 0) return 4;
+    if (strcmp(lower, "green") == 0) return 5;
+    if (strcmp(lower, "blue") == 0) return 6;
+    if (strcmp(lower, "violet") == 0) return 7;
+    if (strcmp(lower, "grey") == 0 || strcmp(lower, "gray") == 0) return 8;
+    if (strcmp(lower, "white") == 0) return 9;
+    return -1; // Invalid color
+}
+
+// Functionality 3: Decode 3-band resistor colour code
+void decodeResistor() {
+    char b1[20], b2[20], b3[20];
+    
+    printf("\n--- 3-Band Resistor Colour Code Decoder ---\n");
+    printf("Available colours: Black, Brown, Red, Orange, Yellow, Green, Blue, Violet, Grey, White\n");
+    
+    printf("Enter Band 1 colour: ");
+    scanf("%s", b1);
+    printf("Enter Band 2 colour: ");
+    scanf("%s", b2);
+    printf("Enter Multiplier Band colour: ");
+    scanf("%s", b3);
+
+    int v1 = getColorValue(b1);
+    int v2 = getColorValue(b2);
+    int v3 = getColorValue(b3);
+
+    if (v1 == -1 || v2 == -1 || v3 == -1) {
+        printf("\n[Error] One or more invalid colours entered! Please check the spelling.\n");
+        return;
+    }
+
+    long baseValue = (v1 * 10) + v2;
+    long multiplier = 1;
+    for (int i = 0; i < v3; i++) {
+        multiplier *= 10;
+    }
+    double totalResistance = baseValue * multiplier;
+
+    printf("\n----------------------------------------\n");
+    printf("Resistor Colour Code: %s - %s - %s\n", b1, b2, b3);
+    if (totalResistance >= 1000000) {
+        printf("Decoded Resistance: %.2f M ohms (Megaohms)\n", totalResistance / 1000000.0);
+    } else if (totalResistance >= 1000) {
+        printf("Decoded Resistance: %.2f k ohms (Kilohms)\n", totalResistance / 1000.0);
+    } else {
+        printf("Decoded Resistance: %.0f ohms\n", totalResistance);
+    }
+    printf("----------------------------------------\n");
+}
+
+int main() {
+    struct Component stock[MAX_RECORDS];
+    int count = 0;
+    int choice;
+
+    do {
+        printf("\n========================================\n");
+        printf("   RESISTOR & COMPONENT STOCK SYSTEM    \n");
+        printf("========================================\n");
+        printf("1. Add Component\n");
+        printf("2. View All Components\n");
+        printf("3. Decode 3-Band Resistor Colour Code\n");
+        printf("4. Exit\n");
+        printf("----------------------------------------\n");
+        printf("Enter your choice (1-4): ");
+        
+        if (scanf("%d", &choice) != 1) {
+            printf("\n[Error] Invalid input! Please enter a number.\n");
+            while(getchar() != '\n'); // clear input buffer
+            continue;
+        }
+
+        switch(choice) {
+            case 1: {
+                if (count >= MAX_RECORDS) {
+                    printf("\n[Error] Array is full! Cannot add more components (Max Limit: 50).\n");
+                    break;
+                }
+                printf("\n--- Add Component ---\n");
+                printf("Enter component type (e.g., Resistor, Capacitor): ");
+                scanf("%s", stock[count].type);
+                printf("Enter component value (e.g., 100uF, 4.7k): ");
+                scanf("%s", stock[count].value);
+                printf("Enter quantity: ");
+                scanf("%d", &stock[count].quantity);
+
+                count++;
+                printf("\n[Success] Component added! Automatically assigned S.No.: %d\n", count);
+                break;
+            }
+            case 2: {
+                if (count == 0) {
+                    printf("\n[Info] No components found in stock.\n");
+                    break;
+                }
+                printf("\n=================================================================\n");
+                printf("%-6s | %-20s | %-15s | %-10s\n", "S.No.", "Type", "Value", "Quantity");
+                printf("-----------------------------------------------------------------\n");
+                for (int i = 0; i < count; i++) {
+                    printf("%-6d | %-20s | %-15s | %-10d\n", i + 1, stock[i].type, stock[i].value, stock[i].quantity);
+                }
+                printf("=================================================================\n");
+                break;
+            }
+            case 3: {
+                decodeResistor();
+                break;
+            }
+            case 4:
+                printf("\nExiting program. Thank you!\n");
+                break;
+            default:
+                printf("\n[Error] Invalid choice! Please choose between 1 and 4.\n");
+        }
+    } while(choice != 4);
+
+    return 0;
+}
